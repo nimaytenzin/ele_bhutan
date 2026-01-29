@@ -340,6 +340,12 @@
   loadGeoJSON()
     .then(buildIndex)
     .then(fillDzongkhagSelect)
+    .then(function () {
+      if (dzongkhags.length) {
+        $dz.value = dzongkhags[0];
+        onDzChange();
+      }
+    })
     .catch(function (e) {
       console.error(e);
       alert('Could not load gewogs.geojson. Serve this folder with a local server (e.g. npx serve or python -m http.server).');
