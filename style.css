@@ -147,6 +147,11 @@ body {
   border-radius: 6px;
   padding: 14px 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: grab;
+  user-select: none;
+}
+.map-legend:active {
+  cursor: grabbing;
 }
 
 .map-legend-title {

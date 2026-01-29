@@ -395,6 +395,63 @@
     doNext();
   }
 
+  function makeLegendDraggable() {
+    var legend = document.getElementById('map-legend');
+    var container = document.getElementById('map');
+    if (!legend || !container) return;
+    var startX, startY, startLeft, startTop;
+    function getCoords(e) {
+      return e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY };
+    }
+    function onDown(e) {
+      if (e.target.closest('select') || e.target.closest('button')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var rect = legend.getBoundingClientRect();
+      var parentRect = container.getBoundingClientRect();
+      var left = rect.left - parentRect.left;
+      var top = rect.top - parentRect.top;
+      legend.style.right = 'auto';
+      legend.style.bottom = 'auto';
+      legend.style.left = left + 'px';
+      legend.style.top = top + 'px';
+      var coords = getCoords(e);
+      startX = coords.x;
+      startY = coords.y;
+      startLeft = left;
+      startTop = top;
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      document.addEventListener('touchmove', onMove, { passive: false });
+      document.addEventListener('touchend', onUp);
+    }
+    function onMove(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var coords = getCoords(e);
+      var dx = coords.x - startX;
+      var dy = coords.y - startY;
+      var newLeft = startLeft + dx;
+      var newTop = startTop + dy;
+      var cw = container.offsetWidth;
+      var ch = container.offsetHeight;
+      var lw = legend.offsetWidth;
+      var lh = legend.offsetHeight;
+      newLeft = Math.max(0, Math.min(cw - lw, newLeft));
+      newTop = Math.max(0, Math.min(ch - lh, newTop));
+      legend.style.left = newLeft + 'px';
+      legend.style.top = newTop + 'px';
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onUp);
+    }
+    legend.addEventListener('mousedown', onDown);
+    legend.addEventListener('touchstart', onDown, { passive: false });
+  }
+
   $dz.addEventListener('change', onDzChange);
   $attr.addEventListener('change', onAttrChange);
   if ($display) $display.addEventListener('change', onDisplayChange);
@@ -406,6 +463,7 @@
   }
 
   initMap();
+  makeLegendDraggable();
   fillAttributeSelect();
   updateLegend();
   updateMapLegend(false);
