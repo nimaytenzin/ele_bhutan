@@ -11,16 +11,16 @@
     { key: '_E Loss S (in BTN million)', label: 'Economic Loss (BTN In million) 2011' }
   ];
 
-  var map, geoLayer, labelLayer, data = null;
+  var map, geoLayer, labelLayer, buildingLayer, data = null;
   var byDzongkhag = {};
   var dzongkhags = [];
   var currentDz = null;
+  var DZ_TO_BUILDING_FILE = { 'Trashyangtse': 'Yangtse' };
   var valueKey = '_PGA M';
   var valueMin = 0;
   var valueMax = 1;
   var numClasses = 5;
   var classBreaks = [];
-  var ZOOM_LABEL_MIN = 11;
 
   var $dz = document.getElementById('dzongkhag');
   var $attr = document.getElementById('attribute');
@@ -38,11 +38,40 @@
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
       maxZoom: 20
     }).addTo(map);
-    map.on('zoomend', refreshLabels);
+  }
+
+  function getBuildingPath(dzName) {
+    var fileBase = DZ_TO_BUILDING_FILE[dzName] || dzName;
+    return 'buildings/dzongkhag_' + fileBase + '.geojson';
   }
 
   function loadGeoJSON() {
     return fetch('gewogs.geojson').then(function (r) { return r.json(); });
+  }
+
+  function loadBuildings(dzName) {
+    if (buildingLayer) {
+      map.removeLayer(buildingLayer);
+      buildingLayer = null;
+    }
+    var path = getBuildingPath(dzName);
+    fetch(path)
+      .then(function (r) {
+        if (!r.ok) return null;
+        return r.json();
+      })
+      .then(function (geojson) {
+        if (!geojson || !geojson.features || !geojson.features.length) return;
+        buildingLayer = L.geoJSON(geojson, {
+          style: {
+            fillColor: '#ffffff',
+            fillOpacity: 0.5,
+            color: '#ffffff',
+            weight: 2.5
+          }
+        }).addTo(map);
+      })
+      .catch(function () {});
   }
 
   function buildIndex(geojson) {
@@ -127,7 +156,7 @@
   }
 
   function addLabelForFeature(f, layer, name) {
-    if (!name || !labelLayer || map.getZoom() < ZOOM_LABEL_MIN) return;
+    if (!name || !labelLayer) return;
     var center = getLabelCenter(f, layer);
     var ico = L.divIcon({
       className: 'gewog-label leaflet-div-icon',
@@ -136,17 +165,6 @@
       iconAnchor: [70, 11]
     });
     L.marker(center, { icon: ico }).addTo(labelLayer);
-  }
-
-  function refreshLabels() {
-    if (!labelLayer || !geoLayer) return;
-    labelLayer.clearLayers();
-    geoLayer.eachLayer(function (layer) {
-      var f = layer.feature;
-      if (!f) return;
-      var name = (f.properties && f.properties[LAA_KEY]) || '';
-      addLabelForFeature(f, layer, name);
-    });
   }
 
   function onEach(f, layer) {
@@ -163,6 +181,10 @@
   }
 
   function clearMap() {
+    if (buildingLayer) {
+      map.removeLayer(buildingLayer);
+      buildingLayer = null;
+    }
     if (labelLayer) {
       map.removeLayer(labelLayer);
       labelLayer = null;
@@ -185,6 +207,7 @@
   function updateMapLegend(hasData) {
     var $title = document.getElementById('map-legend-title');
     var $items = document.getElementById('map-legend-items');
+    var $buildings = document.getElementById('map-legend-buildings');
     $title.textContent = getAttrLabel(valueKey) + ' (equal interval)';
     $items.innerHTML = '';
     var n = hasData ? numClasses : 5;
@@ -198,6 +221,18 @@
         : '—';
       d.innerHTML = '<span class="map-legend-box" style="background:' + color + '"></span><span class="map-legend-value">' + label + '</span>';
       $items.appendChild(d);
+    }
+    if ($buildings) {
+      $buildings.innerHTML = '';
+      if (hasData) {
+        var sep = document.createElement('div');
+        sep.className = 'map-legend-sep';
+        $buildings.appendChild(sep);
+        var row = document.createElement('div');
+        row.className = 'map-legend-item';
+        row.innerHTML = '<span class="map-legend-box map-legend-box-building"></span><span class="map-legend-value">Building footprint</span>';
+        $buildings.appendChild(row);
+      }
     }
   }
 
@@ -231,6 +266,7 @@
     labelLayer = L.layerGroup().addTo(map);
     var collection = { type: 'FeatureCollection', features: features };
     geoLayer = L.geoJSON(collection, { style: style, onEachFeature: onEach }).addTo(map);
+    loadBuildings(currentDz);
 
     var b = geoLayer.getBounds();
     if (b.isValid()) map.fitBounds(b, { padding: [40, 40], maxZoom: 12 });

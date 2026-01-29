@@ -178,6 +178,24 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.map-legend-sep {
+  height: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 10px 0 8px 0;
+}
+
+.map-legend-buildings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.map-legend-box-building {
+  background: #ffffff !important;
+  border: 1px solid #94a3b8 !important;
+  opacity: 0.9;
+}
+
 @media print {
   .map-legend {
     width: 55mm;
