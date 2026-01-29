@@ -21,9 +21,11 @@
   var valueMax = 1;
   var numClasses = 5;
   var classBreaks = [];
+  var viewMode = 'default'; // 'default' | 'buildings-outline'
 
   var $dz = document.getElementById('dzongkhag');
   var $attr = document.getElementById('attribute');
+  var $display = document.getElementById('display');
   var $legendLabel = document.getElementById('legend-label');
 
   function getAttrLabel(key) {
@@ -32,7 +34,12 @@
   }
 
   function initMap() {
-    map = L.map('map', { preferCanvas: true }).setView([27.4, 90.4], 7);
+    map = L.map('map', {
+      preferCanvas: true,
+      zoomControl: false,
+      zoomSnap: 0.25,
+      zoomDelta: 0.25
+    }).setView([27.4, 90.4], 7);
     L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
       attribution: '&copy; Google',
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
@@ -55,6 +62,9 @@
       buildingLayer = null;
     }
     var path = getBuildingPath(dzName);
+    var buildingStyle = viewMode === 'buildings-outline'
+      ? { fillColor: '#2563eb', fillOpacity: 1, color: '#1d4ed8', weight: 2 }
+      : { fillColor: '#3b82f6', fillOpacity: 1, color: '#1d4ed8', weight: 1 };
     fetch(path)
       .then(function (r) {
         if (!r.ok) return null;
@@ -63,12 +73,7 @@
       .then(function (geojson) {
         if (!geojson || !geojson.features || !geojson.features.length) return;
         buildingLayer = L.geoJSON(geojson, {
-          style: {
-            fillColor: '#3b82f6',
-            fillOpacity:1,
-            color: '#1d4ed8',
-            weight: 1
-          }
+          style: buildingStyle
         }).addTo(map);
       })
       .catch(function () {});
@@ -131,6 +136,14 @@
   }
 
   function style(f) {
+    if (viewMode === 'buildings-outline') {
+      return {
+        fillColor: '#94a3b8',
+        fillOpacity: 0,
+        color: '#ffffff',
+        weight: 1.5
+      };
+    }
     var v = f.properties && f.properties[valueKey];
     var num = typeof v === 'number' && !isNaN(v) ? v : null;
     if (num == null) return { fillColor: '#94a3b8', fillOpacity: 0.5, color: '#ffffff', weight: 1.5 };
@@ -223,18 +236,26 @@
     var $title = document.getElementById('map-legend-title');
     var $items = document.getElementById('map-legend-items');
     var $buildings = document.getElementById('map-legend-buildings');
-    $title.textContent = getAttrLabel(valueKey) + ' (equal interval)';
+    var outlineOnly = viewMode === 'buildings-outline';
+    $title.textContent = outlineOnly ? 'Display' : getAttrLabel(valueKey) + ' (equal interval)';
     $items.innerHTML = '';
-    var n = hasData ? numClasses : 5;
-    for (var i = 0; i < n; i++) {
+    if (!outlineOnly) {
+      var n = hasData ? numClasses : 5;
+      for (var i = 0; i < n; i++) {
+        var d = document.createElement('div');
+        d.className = 'map-legend-item';
+        var ratio = (i + 0.5) / n;
+        var color = getColor(ratio);
+        var label = hasData && classBreaks[i] != null && classBreaks[i + 1] != null
+          ? formatVal(classBreaks[i]) + ' – ' + formatVal(classBreaks[i + 1])
+          : '—';
+        d.innerHTML = '<span class="map-legend-box" style="background:' + color + '"></span><span class="map-legend-value">' + label + '</span>';
+        $items.appendChild(d);
+      }
+    } else if (hasData) {
       var d = document.createElement('div');
       d.className = 'map-legend-item';
-      var ratio = (i + 0.5) / n;
-      var color = getColor(ratio);
-      var label = hasData && classBreaks[i] != null && classBreaks[i + 1] != null
-        ? formatVal(classBreaks[i]) + ' – ' + formatVal(classBreaks[i + 1])
-        : '—';
-      d.innerHTML = '<span class="map-legend-box" style="background:' + color + '"></span><span class="map-legend-value">' + label + '</span>';
+      d.innerHTML = '<span class="map-legend-box" style="background:transparent;border:2px solid #ffffff;"></span><span class="map-legend-value">Gewog outline</span>';
       $items.appendChild(d);
     }
     if ($buildings) {
@@ -284,7 +305,7 @@
     loadBuildings(currentDz);
 
     var b = geoLayer.getBounds();
-    if (b.isValid()) map.fitBounds(b, { padding: [40, 40], maxZoom: 12 });
+    if (b.isValid()) map.fitBounds(b, { padding: [20, 20], maxZoom: 16 });
     updateMapLegend(true);
   }
 
@@ -296,6 +317,11 @@
   function onAttrChange() {
     valueKey = $attr.value || '_PGA M';
     updateLegend();
+    redraw();
+  }
+
+  function onDisplayChange() {
+    viewMode = ($display && $display.value) || 'default';
     redraw();
   }
 
@@ -374,6 +400,7 @@
 
   $dz.addEventListener('change', onDzChange);
   $attr.addEventListener('change', onAttrChange);
+  if ($display) $display.addEventListener('change', onDisplayChange);
   if (document.getElementById('save-image')) {
     document.getElementById('save-image').addEventListener('click', saveAsImage);
   }
