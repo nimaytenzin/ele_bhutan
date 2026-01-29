@@ -109,12 +109,11 @@ body {
   background: #1a1a2e;
 }
 
-/* A4 landscape aspect ratio: 297 × 210 */
+/* A4 portrait aspect ratio: 210 × 297 (width × height) */
 .map-container {
   position: relative;
-  width: 100%;
-  max-height: 100%;
-  aspect-ratio: 297 / 210;
+  height: 100vh;
+  aspect-ratio: 210 / 297;
 }
 
 #map {
