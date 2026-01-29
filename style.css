@@ -1,0 +1,233 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #1a1a2e;
+  color: #eee;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.panel {
+  width: 280px;
+  min-width: 280px;
+  padding: 1rem 1.25rem;
+  background: #16213e;
+  border-right: 1px solid #0f3460;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.panel h1 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e94560;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field label {
+  font-size: 0.8rem;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.panel select {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.95rem;
+  border: 1px solid #0f3460;
+  border-radius: 6px;
+  background: #1a1a2e;
+  color: #eee;
+  cursor: pointer;
+}
+
+.panel select:focus {
+  outline: none;
+  border-color: #e94560;
+}
+
+.legend {
+  padding: 0.5rem 0;
+}
+
+.legend-label {
+  font-size: 0.8rem;
+  color: #a0aec0;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.legend-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #22c55e, #eab308, #ef4444);
+}
+
+.btn-save {
+  margin-top: auto;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background: #e94560;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-save:hover {
+  background: #c73e54;
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.map-wrapper {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a2e;
+}
+
+/* A4 landscape aspect ratio: 297 × 210 */
+.map-container {
+  position: relative;
+  width: 100%;
+  max-height: 100%;
+  aspect-ratio: 297 / 210;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* A4-friendly: ~55mm wide at 96dpi ≈ 208px; comfortable on A4 print */
+.map-legend {
+  position: absolute;
+  bottom: 32px;
+  right: 16px;
+  z-index: 2000;
+  width: 200px;
+  max-width: calc(100% - 24px);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.map-legend-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+  text-align: center;
+  line-height: 1.3;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 10px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.map-legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.map-legend-box {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.map-legend-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  font-variant-numeric: tabular-nums;
+}
+
+@media print {
+  .map-legend {
+    width: 55mm;
+    padding: 3mm 4mm;
+    bottom: 8mm;
+    right: 8mm;
+    box-shadow: none;
+    border: 0.5pt solid #94a3b8;
+  }
+  .map-legend-title { font-size: 9pt; margin-bottom: 2.5mm; padding-bottom: 2mm; }
+  .map-legend-items { gap: 2mm; }
+  .map-legend-box { width: 4.5mm; height: 4.5mm; }
+  .map-legend-value { font-size: 9pt; }
+}
+
+.gewog-label {
+  background: none !important;
+  border: none !important;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 2px #000, 0 0 4px #000, 1px 1px 2px #000;
+  white-space: nowrap;
+  padding: 0;
+}
+
+.gewog-label span {
+  display: inline-block;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  background: #16213e;
+  color: #eee;
+  border: 1px solid #0f3460;
+}
+
+.leaflet-popup-tip {
+  background: #16213e;
+}
+
+.leaflet-popup-content {
+  margin: 0.6rem 0.8rem;
+  font-size: 0.9rem;
+}
+
+.leaflet-popup-content strong {
+  color: #e94560;
+}

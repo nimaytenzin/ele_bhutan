@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bhutan Gewogs by Dzongkhag</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="panel">
+      <h1>Gewogs Map</h1>
+      <div class="field">
+        <label for="dzongkhag">Dzongkhag</label>
+        <select id="dzongkhag"></select>
+      </div>
+      <div class="field">
+        <label for="attribute">Color by</label>
+        <select id="attribute"></select>
+      </div>
+      <div class="legend">
+        <span id="legend-label" class="legend-label">PGA(g) 2009: green (low) → red (high)</span>
+        <div class="legend-bar"></div>
+      </div>
+      <button type="button" id="save-image" class="btn-save">Save as image</button>
+    </aside>
+    <div class="map-wrapper">
+      <div class="map-container" id="map-export-container">
+        <div id="map">
+      <div id="map-legend" class="map-legend">
+        <div id="map-legend-title" class="map-legend-title">—</div>
+        <div id="map-legend-items" class="map-legend-items"></div>
+      </div>
+    </div>
+    </div>
+  </div>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
