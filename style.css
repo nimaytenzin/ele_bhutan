@@ -99,6 +99,13 @@ body {
   cursor: not-allowed;
 }
 
+.panel-copyright {
+  margin: 0.75rem 0 0 0;
+  font-size: 0.7rem;
+  color: #718096;
+  text-align: center;
+}
+
 .map-wrapper {
   flex: 1;
   min-width: 0;
