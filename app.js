@@ -37,6 +37,7 @@
     map = L.map('map', {
       preferCanvas: true,
       zoomControl: false,
+      attributionControl: false,
       zoomSnap: 0.25,
       zoomDelta: 0.25
     }).setView([27.4, 90.4], 7);
@@ -138,8 +139,8 @@
   function style(f) {
     if (viewMode === 'buildings-outline') {
       return {
-        fillColor: '#94a3b8',
-        fillOpacity: 0,
+        fillColor: '#fef9c3',
+        fillOpacity: 0.6,
         color: '#ffffff',
         weight: 1.5
       };
@@ -233,29 +234,25 @@
   }
 
   function updateMapLegend(hasData) {
+    var $legend = document.getElementById('map-legend');
+    var outlineOnly = viewMode === 'buildings-outline';
+    if ($legend) $legend.style.display = outlineOnly ? 'none' : '';
+    if (outlineOnly) return;
     var $title = document.getElementById('map-legend-title');
     var $items = document.getElementById('map-legend-items');
     var $buildings = document.getElementById('map-legend-buildings');
-    var outlineOnly = viewMode === 'buildings-outline';
-    $title.textContent = outlineOnly ? 'Display' : getAttrLabel(valueKey) + ' (equal interval)';
+    $title.textContent = getAttrLabel(valueKey) + ' (equal interval)';
     $items.innerHTML = '';
-    if (!outlineOnly) {
-      var n = hasData ? numClasses : 5;
-      for (var i = 0; i < n; i++) {
-        var d = document.createElement('div');
-        d.className = 'map-legend-item';
-        var ratio = (i + 0.5) / n;
-        var color = getColor(ratio);
-        var label = hasData && classBreaks[i] != null && classBreaks[i + 1] != null
-          ? formatVal(classBreaks[i]) + ' – ' + formatVal(classBreaks[i + 1])
-          : '—';
-        d.innerHTML = '<span class="map-legend-box" style="background:' + color + '"></span><span class="map-legend-value">' + label + '</span>';
-        $items.appendChild(d);
-      }
-    } else if (hasData) {
+    var n = hasData ? numClasses : 5;
+    for (var i = 0; i < n; i++) {
       var d = document.createElement('div');
       d.className = 'map-legend-item';
-      d.innerHTML = '<span class="map-legend-box" style="background:transparent;border:2px solid #ffffff;"></span><span class="map-legend-value">Gewog outline</span>';
+      var ratio = (i + 0.5) / n;
+      var color = getColor(ratio);
+      var label = hasData && classBreaks[i] != null && classBreaks[i + 1] != null
+        ? formatVal(classBreaks[i]) + ' – ' + formatVal(classBreaks[i + 1])
+        : '—';
+      d.innerHTML = '<span class="map-legend-box" style="background:' + color + '"></span><span class="map-legend-value">' + label + '</span>';
       $items.appendChild(d);
     }
     if ($buildings) {
