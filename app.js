@@ -145,13 +145,28 @@
   }
 
   function getLabelCenter(f, layer) {
-    if (typeof turf !== 'undefined' && turf.pointOnFeature) {
-      try {
+    if (typeof turf === 'undefined') return layer.getBounds().getCenter();
+    try {
+      if (turf.pointOnFeature) {
         var pt = turf.pointOnFeature(f);
         var c = pt.geometry.coordinates;
         return L.latLng(c[1], c[0]);
-      } catch (e) {}
-    }
+      }
+    } catch (e) {}
+    try {
+      if (turf.centerOfMass) {
+        var pt = turf.centerOfMass(f);
+        var c = pt.geometry.coordinates;
+        return L.latLng(c[1], c[0]);
+      }
+    } catch (e) {}
+    try {
+      if (turf.centroid) {
+        var pt = turf.centroid(f);
+        var c = pt.geometry.coordinates;
+        return L.latLng(c[1], c[0]);
+      }
+    } catch (e) {}
     return layer.getBounds().getCenter();
   }
 
@@ -159,12 +174,12 @@
     if (!name || !labelLayer) return;
     var center = getLabelCenter(f, layer);
     var ico = L.divIcon({
-      className: 'gewog-label leaflet-div-icon',
-      html: '<span>' + name + '</span>',
+      className: 'gewog-label',
+      html: '<div style="text-align: center; width: 100%;">' + name + '</div>',
       iconSize: [140, 22],
       iconAnchor: [70, 11]
     });
-    L.marker(center, { icon: ico }).addTo(labelLayer);
+    L.marker(center, { icon: ico, interactive: false }).addTo(labelLayer);
   }
 
   function onEach(f, layer) {
