@@ -99,6 +99,10 @@ body {
   cursor: not-allowed;
 }
 
+.btn-download-all {
+  margin-top: 0.5rem;
+}
+
 .panel-copyright {
   margin: 0.75rem 0 0 0;
   font-size: 0.7rem;
@@ -198,8 +202,8 @@ body {
 }
 
 .map-legend-box-building {
-  background: #ffffff !important;
-  border: 1px solid #94a3b8 !important;
+  background: #3b82f6 !important;
+  border: 1px solid #1d4ed8 !important;
   opacity: 0.9;
 }
 

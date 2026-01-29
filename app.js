@@ -64,10 +64,10 @@
         if (!geojson || !geojson.features || !geojson.features.length) return;
         buildingLayer = L.geoJSON(geojson, {
           style: {
-            fillColor: '#ffffff',
-            fillOpacity: 0.5,
-            color: '#ffffff',
-            weight:1
+            fillColor: '#3b82f6',
+            fillOpacity:1,
+            color: '#1d4ed8',
+            weight: 1
           }
         }).addTo(map);
       })
@@ -299,16 +299,11 @@
     redraw();
   }
 
-  function saveAsImage() {
+  function captureMapImage(filename) {
     var el = document.getElementById('map-export-container');
-    if (!el || typeof html2canvas === 'undefined') {
-      alert('Export not available. Ensure html2canvas is loaded.');
-      return;
-    }
-    var btn = document.getElementById('save-image');
-    if (btn) { btn.disabled = true; btn.textContent = 'Exporting…'; }
+    if (!el || typeof html2canvas === 'undefined') return Promise.reject(new Error('Export not available'));
     if (map) map.invalidateSize();
-    html2canvas(el, {
+    return html2canvas(el, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
@@ -316,21 +311,74 @@
       backgroundColor: '#1a1a2e'
     }).then(function (canvas) {
       var link = document.createElement('a');
-      link.download = 'gewogs-map-' + (currentDz || 'all') + '-' + new Date().toISOString().slice(0, 10) + '.png';
+      link.download = filename || 'gewogs-map-' + (currentDz || 'all') + '-' + new Date().toISOString().slice(0, 10) + '.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
-      if (btn) { btn.disabled = false; btn.textContent = 'Save as image'; }
-    }).catch(function (err) {
-      console.error(err);
-      if (btn) { btn.disabled = false; btn.textContent = 'Save as image'; }
-      alert('Export failed. Try again.');
     });
+  }
+
+  function saveAsImage() {
+    var btn = document.getElementById('save-image');
+    if (btn) { btn.disabled = true; btn.textContent = 'Exporting…'; }
+    captureMapImage()
+      .then(function () { if (btn) { btn.disabled = false; btn.textContent = 'Save as image'; } })
+      .catch(function (err) {
+        console.error(err);
+        if (btn) { btn.disabled = false; btn.textContent = 'Save as image'; }
+        alert('Export failed. Try again.');
+      });
+  }
+
+  function slug(str) {
+    return (str || '').replace(/\s+/g, '-').replace(/[()]/g, '').replace(/[^a-zA-Z0-9-]/g, '') || 'attr';
+  }
+
+  function downloadAll() {
+    var el = document.getElementById('map-export-container');
+    if (!el || typeof html2canvas === 'undefined') {
+      alert('Export not available. Ensure html2canvas is loaded.');
+      return;
+    }
+    if (!dzongkhags.length || !ATTR_OPTS.length) return;
+    var btn = document.getElementById('download-all');
+    if (btn) { btn.disabled = true; btn.textContent = 'Downloading…'; }
+    var combinations = [];
+    for (var i = 0; i < dzongkhags.length; i++) {
+      for (var j = 0; j < ATTR_OPTS.length; j++) {
+        combinations.push({ dz: dzongkhags[i], attr: ATTR_OPTS[j] });
+      }
+    }
+    var date = new Date().toISOString().slice(0, 10);
+    var index = 0;
+    function doNext() {
+      if (index >= combinations.length) {
+        if (btn) { btn.disabled = false; btn.textContent = 'Download all'; }
+        return;
+      }
+      var c = combinations[index];
+      $dz.value = c.dz;
+      $attr.value = c.attr.key;
+      currentDz = c.dz;
+      valueKey = c.attr.key;
+      updateLegend();
+      redraw();
+      index++;
+      setTimeout(function () {
+        captureMapImage('gewogs-' + slug(c.dz) + '-' + slug(c.attr.label) + '-' + date + '.png')
+          .then(function () { setTimeout(doNext, 400); })
+          .catch(function () { setTimeout(doNext, 400); });
+      }, 1400);
+    }
+    doNext();
   }
 
   $dz.addEventListener('change', onDzChange);
   $attr.addEventListener('change', onAttrChange);
   if (document.getElementById('save-image')) {
     document.getElementById('save-image').addEventListener('click', saveAsImage);
+  }
+  if (document.getElementById('download-all')) {
+    document.getElementById('download-all').addEventListener('click', downloadAll);
   }
 
   initMap();
