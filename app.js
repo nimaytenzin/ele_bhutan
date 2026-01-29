@@ -67,7 +67,7 @@
             fillColor: '#ffffff',
             fillOpacity: 0.5,
             color: '#ffffff',
-            weight: 2.5
+            weight:1
           }
         }).addTo(map);
       })
