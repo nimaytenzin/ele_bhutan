@@ -15,7 +15,7 @@
   var byDzongkhag = {};
   var dzongkhags = [];
   var currentDz = null;
-  var DZ_TO_BUILDING_FILE = { 'Trashyangtse': 'Yangtse' };
+  var DZ_TO_BUILDING_FILE = { 'Trashyangtse': 'Yangtse', 'PemaGatshel': 'Pemagatshel' };
   var valueKey = '_PGA M';
   var valueMin = 0;
   var valueMax = 1;
