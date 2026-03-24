@@ -54,7 +54,7 @@
   }
 
   function loadGeoJSON() {
-    return fetch('gewogs.geojson').then(function (r) { return r.json(); });
+    return fetch('gewogs_updated.geojson').then(function (r) { return r.json(); });
   }
 
   function loadBuildings(dzName) {
